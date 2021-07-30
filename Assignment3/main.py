@@ -1,11 +1,11 @@
 import math
 
+
 class Tree(object):
     def __init__(self):
         self.node_dict = {}
         self.num_node = 0
         self.root = None
-        # self.value = None
 
     def add_child(self, child_id, child_node):
         if child_id not in self.children_list:
@@ -32,11 +32,46 @@ class Tree(object):
 
     def get_nodes(self):
         return self.node_dict.keys()
-        
+
+    def max_value(state, a, b, depth):
+        if (depth == 0):
+            return state.value
+        for s in state.children_list:
+            a = max(a, min_value(s, a, b, depth-1))
+            if a >= b:
+                return a
+
+    def min_value(state, a, b, depth):
+        if (depth == 0):
+            return state.value
+        for s in state.children_list:
+            b = min(b, max_value(s, a, b, depth-1))
+            if b >= a:
+                return b
+
+    def minmax(self):
+        self.minimax(self.root, 2, True, node=0)
+
     # start of normal minimax algorithm
-    def minimax():
-        pass
-    
+    # TODO a way to find depth without hard coding it in
+    # TODO implement DFS into function
+    def minimax(self, root, depth, player, node):
+        for i in depth:
+            print(i)
+        if (depth % 2) == 0:
+            value = math.inf
+            print("even (maximizing player)")
+            for node in root.children_list:
+                value = max(value, minimax(node, depth-1, False))
+            return value
+
+        else:
+            print("odd (minimizing player)")
+            value = math.inf
+            for node in root.children_list:
+                value = min(value, minimax(node, depth-1, True))
+            return value
+
     # start of minimax algorithm with pruning
     def minimax_prune():
         pass
@@ -54,20 +89,45 @@ class Tree(object):
     def DFS_traversal(self):
         self.DFS_util(self.root)
 
+    def findDepth(node):
+        if node is None:
+            return 0
+        else:
+            leftDepth = findDepth(node.left)
+            rightDepth = findDepth(node.right)
+
+            if (leftDepth > rightDepth):
+                return leftDepth + 1
+            else:
+                return rightDepth + 1
+
 
 class Node:
     def __init__(self, id, parent_node, value):
         self.id = id
         self.parent_node = parent_node
         self.visited = False
+        # list of successors
         self.children_list = []
         # holding value of nodes for every min/max layer
-        self.value = value 
+        self.value = value
 
         self.alpha = -math.inf
         self.beta = math.inf
 
         self.isPruned = False
+
+    def setAlpha(self, a):
+        self.alpha = a
+
+    def setBeta(self, b):
+        self.beta = b
+
+    def getAlpha(self):
+        return self.alpha
+
+    def getBeta(self):
+        return self.beta
 
     def add_child(self, child_id, child_node):
         if child_id not in self.children_list:
@@ -85,10 +145,9 @@ class Node:
     def get_children_id(self):
         return self.id
 
-    def get_parent(self):
-        return self.parent_node
+
 t = Tree()
-t.add_node("A", "", None) # can represent as max or min
+t.add_node("A", "", None)
 t.add_node("B", "A", None)
 t.add_node("C", "A", None)
 t.add_node("D", "A", None)
@@ -102,4 +161,11 @@ t.add_node("D1", "D", 14)
 t.add_node("D2", "D", 5)
 t.add_node("D3", "D", 2)
 
+# tree below
+#             A
+#       /     |     \
+#   B         C        D
+# 3 12 8    2 4 6   14 5 2
+
 t.DFS_traversal()
+# print(t.minmax())
