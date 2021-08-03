@@ -1,171 +1,122 @@
-import math
+# Project 3
+# Mark Arias
+# Rifat Hasan
+# CECS 451
+
+from forest_module import Tree
+import csv
 
 
-class Tree(object):
-    def __init__(self):
-        self.node_dict = {}
-        self.num_node = 0
-        self.root = None
+# -------------------------------------------------------------------------
+# tree.txt file reader code
 
-    def add_child(self, child_id, child_node):
-        if child_id not in self.children_list:
-            self.children_list.append(child_node)
+# load a tree layout file and return it
+def load_tree_file(file_name):
+    f = open(file_name)
+    tree_file = f.read()
+    f.close()
+    return tree_file
 
-    def add_node(self, node_id, parent_id, value):
-        if len(parent_id) == 0:
-            parent = None
-            new_v = Node(node_id, parent, value)
-            self.root = new_v
+
+# parse tree_file
+def parse_tree_file(tree_file):
+    parsed_tree = []
+    lines = tree_file.splitlines()
+    for line in lines:
+        print(line)
+    return parsed_tree
+
+
+# build minimax tree from input file and return it
+def build_minimax_tree(file_name):
+    mini_max_tree = Tree()
+
+    with open(file_name) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+
+        for row in csv_reader:
+
+            # length of csv entries in the file
+            row_length = len(row)
+            # if player is max or minimzer is specified in entry 0
+            player_type = row[0]
+            # parent of nodes specified in entry 1
+            parent_node = row[1]
+
+            if row_length == 3:  # size of row length of row with root
+                parsed_data = row[2]
+                split_data = parsed_data.split("=")
+                node = split_data[0]
+                node_value = split_data[1]
+                # add nodes to the tree in format ( node, parent, value of current node, player type)
+                mini_max_tree.add_node(
+                    node.strip(), "", node_value, player_type)
+            else:                                           # all other conditions with multiple children nodes
+                # this controls the range of iteration
+                for i in range(2, row_length):
+                    # take data entry from row i entry
+                    temp_data = row[i]
+                    # break apart input data spit by equals sign
+                    temp_data_split = temp_data.split("=")
+                    # take the node name
+                    curr_node = temp_data_split[0]
+                    curr_node_value = temp_data_split[1]    # take node value
+                    # add nodes to the tree in format ( node, parent, value of current node, player type)
+                    mini_max_tree.add_node(
+                        curr_node.strip(), parent_node.strip(), curr_node_value, player_type)
+
+    return mini_max_tree
+
+
+# -------------------------------------------------------------------------
+# main code
+if __name__ == '__main__':
+    print("Project 3")
+    # file below just prints out contents of input txt file
+
+
+    choice = 0
+    while choice != 1 or 2:
+        choice = int(input("\nEnter 1 or 2 for corresponding tree: "))
+
+        if choice == 1:
+            # loads corresponding file into program
+            tree_file = load_tree_file("tree1.txt")
+            print("****   Contents of input file   ****")
+            # parses the text file to read and manipulate contents
+            parse_tree_file(tree_file)
+            print()
+            mini_max_tree = build_minimax_tree("tree1.txt")
+            # outputs the value and letter of each node based on DFS
+            mini_max_tree.DFS_traversal()
+            print("\nMinimax Algorithm:")
+            # finds best move for player based on starting node, depth, and maximizing player
+            best_move = mini_max_tree.minimax("A", 2, "max")
+            break
+        elif choice == 2:
+            tree_file = load_tree_file("tree2.txt")
+            print("****   Contents of input file   ****")
+            parse_tree_file(tree_file)
+            print()
+            mini_max_tree = build_minimax_tree("tree2.txt")
+            mini_max_tree.DFS_traversal()
+            print("\nMinimax Algorithm:")
+            best_move = mini_max_tree.minimax("A", 4, "max")
+            break
         else:
-            parent = self.node_dict[parent_id]
-            new_v = Node(node_id, parent, value)
-            parent.add_child(node_id, new_v)
+            # asks user for another input if previous input was a wrong number
+            print("Invalid entry, try again")
+    # prints the best move based on user input
+    print("Path values to best move possible: ")
+    print(best_move)
 
-        self.node_dict[node_id] = new_v
-        self.num_node += 1
-
-    def get_node(self, node_id):
-        if node_id in self.node_dict:
-            return self.node_dict[node_id]
-        else:
-            return None
-
-    def get_nodes(self):
-        return self.node_dict.keys()
-
-    def max_value(state, a, b, depth):
-        if (depth == 0):
-            return state.value
-        for s in state.children_list:
-            a = max(a, min_value(s, a, b, depth-1))
-            if a >= b:
-                return a
-
-    def min_value(state, a, b, depth):
-        if (depth == 0):
-            return state.value
-        for s in state.children_list:
-            b = min(b, max_value(s, a, b, depth-1))
-            if b >= a:
-                return b
-
-    def minmax(self):
-        self.minimax(self.root, 2, True, node=0)
-
-    # start of normal minimax algorithm
-    # TODO a way to find depth without hard coding it in
-    # TODO implement DFS into function
-    def minimax(self, root, depth, player, node):
-        for i in depth:
-            print(i)
-        if (depth % 2) == 0:
-            value = math.inf
-            print("even (maximizing player)")
-            for node in root.children_list:
-                value = max(value, minimax(node, depth-1, False))
-            return value
-
-        else:
-            print("odd (minimizing player)")
-            value = math.inf
-            for node in root.children_list:
-                value = min(value, minimax(node, depth-1, True))
-            return value
-
-    # start of minimax algorithm with pruning
-    def minimax_prune():
-        pass
-
-    def DFS_util(self, root):
-        for node_item in root.children_list:
-            if node_item.visited == False:
-                self.DFS_util(node_item)
-                node_item.visited = True
-
-        print(root.get_id())
-
-        return
-
-    def DFS_traversal(self):
-        self.DFS_util(self.root)
-
-    def findDepth(node):
-        if node is None:
-            return 0
-        else:
-            leftDepth = findDepth(node.left)
-            rightDepth = findDepth(node.right)
-
-            if (leftDepth > rightDepth):
-                return leftDepth + 1
-            else:
-                return rightDepth + 1
-
-
-class Node:
-    def __init__(self, id, parent_node, value):
-        self.id = id
-        self.parent_node = parent_node
-        self.visited = False
-        # list of successors
-        self.children_list = []
-        # holding value of nodes for every min/max layer
-        self.value = value
-
-        self.alpha = -math.inf
-        self.beta = math.inf
-
-        self.isPruned = False
-
-    def setAlpha(self, a):
-        self.alpha = a
-
-    def setBeta(self, b):
-        self.beta = b
-
-    def getAlpha(self):
-        return self.alpha
-
-    def getBeta(self):
-        return self.beta
-
-    def add_child(self, child_id, child_node):
-        if child_id not in self.children_list:
-            self.children_list.append(child_node)
-
-    def get_id(self):
-        return self.id
-
-    def get_parent(self):
-        return self.parent_node
-
-    def get_children_node(self):
-        return self.children_list
-
-    def get_children_id(self):
-        return self.id
-
-
-t = Tree()
-t.add_node("A", "", None)
-t.add_node("B", "A", None)
-t.add_node("C", "A", None)
-t.add_node("D", "A", None)
-t.add_node("B1", "B", 3)
-t.add_node("B2", "B", 12)
-t.add_node("B3", "B", 8)
-t.add_node("C1", "C", 2)
-t.add_node("C2", "C", 4)
-t.add_node("C3", "C", 6)
-t.add_node("D1", "D", 14)
-t.add_node("D2", "D", 5)
-t.add_node("D3", "D", 2)
-
-# tree below
-#             A
-#       /     |     \
-#   B         C        D
-# 3 12 8    2 4 6   14 5 2
-
-t.DFS_traversal()
-# print(t.minmax())
+    print("****    minimax algorithm with pruning    ****")
+    if choice == 1:
+        best_move_prune = mini_max_tree.pruning_minimax(
+            "A", 2, -1000, 1000, "max")
+    elif choice == 2:
+        # need to pass in value for alpha and beta below, use -1000 and 1000 as proxies for plus/minus infinity
+        best_move_prune = mini_max_tree.pruning_minimax(
+            "A", 4, -1000, 1000, "max")
+    print("Pruned algo best move: " + str(best_move_prune))
