@@ -75,7 +75,6 @@ if __name__ == '__main__':
     print("Project 3")
     # file below just prints out contents of input txt file
 
-
     choice = 0
     while choice != 1 or 2:
         choice = int(input("\nEnter 1 or 2 for corresponding tree: "))
@@ -88,6 +87,7 @@ if __name__ == '__main__':
             parse_tree_file(tree_file)
             print()
             mini_max_tree = build_minimax_tree("tree1.txt")
+            print("here")
             # outputs the value and letter of each node based on DFS
             mini_max_tree.DFS_traversal()
             print("\nMinimax Algorithm:")
@@ -112,6 +112,7 @@ if __name__ == '__main__':
     print(best_move)
 
     print("****    minimax algorithm with pruning    ****")
+    print("(Nodes that are missing have been pruned)")
     if choice == 1:
         best_move_prune = mini_max_tree.pruning_minimax(
             "A", 2, -1000, 1000, "max")

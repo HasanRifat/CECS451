@@ -66,7 +66,7 @@ class Tree(object):
         if maximizing_player == "max":
             max_eval = -1000  # approx of - infinity
             node = self.node_dict[position]
-            children = self.node_dict[position].get_children_node()
+            children = node.get_children_node()
             for child in children:
                 # print(child.get_id())
                 # print(child.get_value())
@@ -79,7 +79,8 @@ class Tree(object):
 
         else:
             min_eval = 1000  # approx of + infinity
-            children = self.node_dict[position].get_children_node()
+            node = self.node_dict[position]
+            children = node.get_children_node()
             for child in children:
                 # print(child.get_id())
                 eval = self.minimax(child.get_id(), depth -
@@ -100,29 +101,31 @@ class Tree(object):
             for child in children:
                 eval = self.pruning_minimax(
                     child.get_id(), depth - 1, alpha, beta, child.get_player_type())
+
                 max_eval = max(int(max_eval), int(eval))
                 alpha = max(int(alpha), int(eval))
-                if beta <= alpha:
-                    print(child.get_id() + " [ Pruned ] ")
-                    break
                 # print out values of max cases
-                print(child.get_id() + "[ " + str(eval) + " ] : not pruned")
+                print(child.get_id() + "[ " + str(eval) + " ]: not pruned")
+                if beta <= alpha:
+                    # print(child.get_id() + " [ Pruned ] ")
+                    break
+
             return max_eval
 
         else:
             min_eval = 1000  # approx of + infinity
             children = self.node_dict[position].get_children_node()
             for child in children:
-                # print(child.get_id())
                 eval = self.pruning_minimax(
                     child.get_id(), depth - 1, alpha, beta, child.get_player_type())
                 min_eval = min(int(min_eval), int(eval))
                 beta = min(int(beta), int(eval))
-                if beta <= alpha:
-                    print(child.get_id() + " [ Pruned ] ")
-                    break
                 # print out values of min cases
-                print(child.get_id() + "[ " + str(eval) + " ] : not pruned")
+                print(child.get_id() + "[ " + str(eval) + " ]: not pruned")
+                if beta <= alpha:
+                    # print(child.get_id() + " [ Pruned ] ")
+                    break
+
             return min_eval
 
 
